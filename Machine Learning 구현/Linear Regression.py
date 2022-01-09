@@ -18,3 +18,4 @@ class linear_model() :
         x = pd.concat([x0,x], axis=1)
 
         return np.dot(x,self.beta_hat)
+

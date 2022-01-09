@@ -82,3 +82,11 @@ model.evaluate(X_test, y_test)
 
 y_pred = model.predict(X_test)
 
+
+### 비순차적 신경망 - 와이드&딥 신경망 : 입력의 일부가 출력층에 바로 연결
+input_ = tf.keras.layers.Input(shape=X_train.shape[1:])
+hidden1 = tf.keras.layers.Dense(30, activation='relu')(input_) # input_을 함수처럼 호출하므로 함수형 API라 한다.
+hidden2 = tf.keras.layers.Dense(30, activation='relu')(hidden1)
+concat = tf.keras.layers.Concatenate()([input_,hidden2])
+output = tf.keras.layers.Dense(1)(concat)
+model = tf.keras.Model(inputs=[input_], outputs=[output])
