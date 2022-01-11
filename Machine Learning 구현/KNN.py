@@ -1,3 +1,6 @@
+import pandas as pd
+import numpy as np
+
 class knn_alg() :
     def __init__(self, n_neighbors):
         self.k = n_neighbors
@@ -13,6 +16,7 @@ class knn_alg() :
         for i in range(n_train):
             for j in range(n_test):
                 self.mat[j][i] = self.euclidean(test_x.iloc[j,:],self.x.iloc[i,:])
+        self.mat.index = self.x.index
         return self.mat
 
     def fit(self,x,y):
@@ -25,5 +29,8 @@ class knn_alg() :
         rank_mat = euc.rank(ascending=False).astype(int)
         for i in rank_mat.columns:
             idx = rank_mat[i].sort_values().index[:self.k]
-            y_hat.append(np.mean(self.y[idx]))
+            if np.mean(self.y[idx])>0.5 :
+                y_hat.append(1)
+            else :
+                y_hat.append(0)
         return y_hat
