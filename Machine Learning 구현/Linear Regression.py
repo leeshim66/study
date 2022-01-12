@@ -6,6 +6,8 @@ class linear_model() :
         return
 
     def fit(self, x, y) :
+        x = x.reset_index(drop=True)
+        y = y.reset_index(drop=True)
         x0 = pd.Series([1] * len(x))
         x = pd.concat([x0,x], axis=1)
         x_t = x.T
@@ -14,6 +16,7 @@ class linear_model() :
         return self.beta_hat
 
     def predict(self, x):
+        x = x.reset_index(drop=True)
         x0 = pd.Series([1] * len(x))
         x = pd.concat([x0,x], axis=1)
 
