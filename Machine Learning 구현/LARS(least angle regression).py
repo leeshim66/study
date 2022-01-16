@@ -1,5 +1,21 @@
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import mean_squared_error
+
+prostate = pd.read_csv('prostate.csv')
+prostate_train = prostate[prostate['train']=='T'].drop('train',axis=1)
+prostate_test = prostate[prostate['train']=='F'].drop('train',axis=1)
+
+X_train = prostate_train.drop('lpsa', axis=1)
+X_test = prostate_test.drop('lpsa', axis=1)
+y_train = prostate_train['lpsa']
+y_test = prostate_test['lpsa']
+
+scale = StandardScaler()
+X_train_scaled = scale.fit_transform(X_train)
+X_test_scaled = scale.transform(X_test)
+
 
 class LARS():
     def __init__(self):
@@ -42,6 +58,20 @@ class LARS():
 
     def predict(self, x):
         x = pd.DataFrame(x)
-        x0 = pd.Series([1] * len(x))
+        x0 = pd.Series([1] * len(x)) # intercept
         x = pd.concat([x0,x], axis=1)
         return np.dot(x,self.beta_hat)
+
+my_lars = LARS()
+my_lars.fit(X_train_scaled,y_train)
+my_lar_pred = my_lars.predict(X_test_scaled)
+mean_squared_error(y_test,my_lar_pred)
+
+
+# scikit-learn에 구현된 Lars와 결과 비교
+from sklearn.linear_model import Lars
+
+lars = Lars()
+lars.fit(X_train_scaled,y_train)
+lar_pred = lars.predict(X_test_scaled)
+mean_squared_error(y_test,lar_pred)
