@@ -1,5 +1,13 @@
 import pandas as pd
 import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+
+spam = pd.read_csv('spam.csv')
+X = spam.drop(['col57'], axis=1)
+y = spam['col57']
+X_train, X_test, y_train, y_test = train_test_split(X,y)
+
 
 class Ridge() :
     def __init__(self, lamda = 0.1):
@@ -22,3 +30,8 @@ class Ridge() :
         x = pd.concat([x0,x], axis=1)
 
         return np.dot(x,self.beta_hat)
+
+my_ridge = Ridge()
+my_ridge.fit(X_train, y_train)
+my_ridge_pred = my_ridge.predict(X_test)
+mean_squared_error(y_test, my_ridge_pred)
