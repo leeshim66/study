@@ -9,7 +9,7 @@ y = spam['col57']
 X_train, X_test, y_train, y_test = train_test_split(X,y)
 
 
-class Ridge() :
+class RidgeRegression() :
     def __init__(self, lamda = 0.1):
         self.lamda = lamda
 
@@ -31,7 +31,15 @@ class Ridge() :
 
         return np.dot(x,self.beta_hat)
 
-my_ridge = Ridge()
-my_ridge.fit(X_train, y_train)
-my_ridge_pred = my_ridge.predict(X_test)
-mean_squared_error(y_test, my_ridge_pred)
+my_rid = RidgeRegression()
+my_rid.fit(X_train, y_train)
+my_rid_pred = my_rid.predict(X_test)
+mean_squared_error(y_test, my_rid_pred)
+
+
+# scikit-learn에 구현된 Ridge와 결과 비교
+from sklearn.linear_model import Ridge
+rid = Ridge()
+rid.fit(X_train,y_train)
+rid_pred = rid.predict(X_test)
+mean_squared_error(y_test,rid_pred)
