@@ -13,39 +13,39 @@ y_female = female['spnbmd']
 
 
 
-class smoothing_spline():
+class Smoothing_Spline():
     def __init__(self, lamda=0):
         self.lamda = lamda
 
     def fit(self,x,y):
         num_row = len(x)
-        N = pd.DataFrame(index=range(0,num_row), columns=range(0,num_row)).fillna(0)
+        N = pd.DataFrame(index=range(0,num_row), columns=range(0,num_row)).fillna(0) # Natural cubic spline
         N[0] = 1
         N[1] = x
-        N_pp = pd.DataFrame(index=range(0,num_row), columns=range(0,num_row)).fillna(0)
-        ep_K = x[num_row-1]
-        ep_K_1 = x[num_row-2]
+        N_pp = pd.DataFrame(index=range(0,num_row), columns=range(0,num_row)).fillna(0) # N의 2차미분 matrix
+        Xi_K = x[num_row-1] # 크사이_K
+        Xi_K_1 = x[num_row-2] # 크사이_K-1
 
         for k in range(num_row-2):
-            ep_k = x[k]
+            Xi_k = x[k]
             for j in range(num_row):
-                if x[j] > ep_k:
-                    N.iloc[j,k+2] = (x[j]-ep_k)**3 / (ep_K-ep_k)
-                    N_pp.iloc[j,k+2] = 6*(x[j]-ep_k)/(ep_K-ep_k)
-                if x[j] > ep_K_1:
-                    N.iloc[j,k+2] = N.iloc[j,k+2] - (x[j]-ep_K_1)**3 / (ep_K-ep_K_1)
-                    N_pp.iloc[j,k+2] = N_pp.iloc[j,k+2] - 6*(x[j]-ep_K_1)/(ep_K-ep_K_1)
+                if x[j] > Xi_k:
+                    N.iloc[j,k+2] = (x[j]-Xi_k)**3 / (Xi_K-Xi_k)
+                    N_pp.iloc[j,k+2] = 6*(x[j]-Xi_k)/(Xi_K-Xi_k)
+                if x[j] > Xi_K_1:
+                    N.iloc[j,k+2] = N.iloc[j,k+2] - (x[j]-Xi_K_1)**3 / (Xi_K-Xi_K_1)
+                    N_pp.iloc[j,k+2] = N_pp.iloc[j,k+2] - 6*(x[j]-Xi_K_1)/(Xi_K-Xi_K_1)
 
         omega = pd.DataFrame(index=range(0,num_row), columns=range(0,num_row)).fillna(0)
         for k in range(num_row):
             for j in range(num_row):
                 omega.iloc[j,k] = np.dot(N_pp.iloc[:,j], N_pp.iloc[:,k])
 
-        if self.lamda==0:
+        if self.lamda==0: # lamda값 미설정시 최적 lamda값 탐색
             final_gcv = sys.maxsize
-            lamda = 0.01
-            for i in range(500):
-                theta = np.dot(np.dot(np.linalg.inv(np.dot(N.T,N) + lamda*omega),N.T),y)
+            lamda = 0.1
+            for i in range(1000):
+                theta = np.dot(np.dot(np.linalg.inv(np.dot(N.T,N) + lamda*omega),N.T),y) # smoothing spline
                 result = np.dot(N,theta)
                 S_lamda = np.dot(np.dot(N, np.linalg.inv(np.dot(N.T,N)+lamda*omega)),N.T)
                 my_gcv = sum(((y-result)/(1-sum(np.diag(S_lamda))/num_row))**2)/num_row
@@ -53,7 +53,7 @@ class smoothing_spline():
                     final_gcv = my_gcv
                     best_lamda = lamda
                     final_result = result
-                lamda += 0.01
+                lamda += 0.1
             print('best lambda : {}'.format(best_lamda))
             return final_result
         else :
@@ -62,8 +62,8 @@ class smoothing_spline():
             return result
 
 
-my_spline_male = smoothing_spline().fit(X_male,y_male)
-my_spline_female = smoothing_spline().fit(X_female,y_female)
+my_spline_male = Smoothing_Spline().fit(X_male,y_male)
+my_spline_female = Smoothing_Spline().fit(X_female,y_female)
 
 plt.plot(X_male,my_spline_male)
 plt.plot(X_female,my_spline_female)
