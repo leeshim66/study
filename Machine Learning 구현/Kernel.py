@@ -8,12 +8,12 @@ X_male = male['age']
 y_male = male['spnbmd']
 
 
-class Kernel():
+class Kernel(): # KNN 사용시 나타나는 불연속성을 제거하기 위해 사용
     def __init__(self, alpha=1, kernel='gaussian'):
         self.lamda = alpha
         self.kernel = eval('self.{}'.format(kernel))
 
-    def gaussian(self, t):
+    def gaussian(self, t): # 비콤팩트 커널 : 무한한 지지를 가짐(모든 x_i에 영향을 받음)
         return 1/np.sqrt(2*np.pi)*np.exp(-t**2/2)
 
     def epanechnikov(self, t):
@@ -22,7 +22,7 @@ class Kernel():
         else :
             return 0
 
-    def tri_cube(self, t):
+    def tri_cube(self, t): # 지지의 경계에서 미분 가능
         if abs(t)<=1 :
             return (1-abs(t)**3)**3
         else :
@@ -35,11 +35,11 @@ class Kernel():
     def predict(self, x_test):
         y_hat = []
         x_test = x_test.reset_index(drop=True)
-        for i in range(len(x_test)):
+        for i in range(len(x_test)): # Nadaraya-Watson 커널 가중 평균
             sik = pd.Series(abs(self.x-x_test[i])/self.lamda)
             K_lamda = sik.apply(lambda x:self.kernel(x))
-            aa = np.dot(K_lamda,self.y) / sum(K_lamda)
-            y_hat.append(round(aa,10))
+            Nadaraya_Watson = np.dot(K_lamda,self.y) / sum(K_lamda)
+            y_hat.append(round(Nadaraya_Watson,10))
         return y_hat
 
 my_kernel_gaussian = Kernel(alpha=1, kernel='gaussian')
