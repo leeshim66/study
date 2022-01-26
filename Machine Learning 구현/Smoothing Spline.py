@@ -26,9 +26,9 @@ class Smoothing_Spline():
         Xi_K = x[num_row-1] # 크사이_K
         Xi_K_1 = x[num_row-2] # 크사이_K-1
 
-        for k in range(num_row-2):
+        for k in range(num_row-2): # N matrix 업데이트
             Xi_k = x[k]
-            for j in range(num_row):
+            for j in range(num_row): # N'' matrix 업데이트
                 if x[j] > Xi_k:
                     N.iloc[j,k+2] = (x[j]-Xi_k)**3 / (Xi_K-Xi_k)
                     N_pp.iloc[j,k+2] = 6*(x[j]-Xi_k)/(Xi_K-Xi_k)
@@ -36,7 +36,7 @@ class Smoothing_Spline():
                     N.iloc[j,k+2] = N.iloc[j,k+2] - (x[j]-Xi_K_1)**3 / (Xi_K-Xi_K_1)
                     N_pp.iloc[j,k+2] = N_pp.iloc[j,k+2] - 6*(x[j]-Xi_K_1)/(Xi_K-Xi_K_1)
 
-        omega = pd.DataFrame(index=range(0,num_row), columns=range(0,num_row)).fillna(0)
+        omega = pd.DataFrame(index=range(0,num_row), columns=range(0,num_row)).fillna(0) # omega matrix
         for k in range(num_row):
             for j in range(num_row):
                 omega.iloc[j,k] = np.dot(N_pp.iloc[:,j], N_pp.iloc[:,k])
