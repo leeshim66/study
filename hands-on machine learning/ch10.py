@@ -7,18 +7,19 @@ import tensorflow as tf
 fashion_mnist = tf.keras.datasets.fashion_mnist
 (X_train_full, y_train_full), (X_test,y_test) = fashion_mnist.load_data()
 
-X_valid,X_train = X_train_full[:10000]/255, X_train_full[10000:]/255
+X_valid,X_train = X_train_full[:10000]/255, X_train_full[10000:]/255 # RGB 데이터이므로 정규화(min-max scaling)
 y_valid,y_train = y_train_full[:10000], y_train_full[10000:]
 X_test = X_test/255
 
-class_names = ['T-shirt/top', 'Trouser','Pullover','Dress','Coat','Sandal','Shirt','Sneaker','Bag','Ankle boot']
+class_names = ['T-shirt/top', 'Trouser','Pullover','Dress','Coat',
+               'Sandal','Shirt','Sneaker','Bag','Ankle boot']
 
 model = tf.keras.models.Sequential()
 model.add(tf.keras.layers.Flatten(input_shape=[28,28]))
 model.add(tf.keras.layers.Dense(300, activation='relu'))
 model.add(tf.keras.layers.Dense(100, activation='relu'))
 model.add(tf.keras.layers.Dense(10, activation='softmax'))
-model.compile(loss='sparse_categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
+model.compile(loss='sparse_categorical_crossentropy', optimizer='sgd', metrics=['accuracy']) # SGD의 학습률을 설정하기 위해 optimizer=tf.keras.optimizers.SGD(lr=0.1)로 설정 가능
 
 history = model.fit(X_train, y_train, epochs=10, validation_data=(X_valid,y_valid))
 model.evaluate(X_test,y_test)
@@ -47,7 +48,7 @@ X_test = scaler.transform(X_test)
 
 model = tf.keras.models.Sequential()
 model.add(tf.keras.layers.Dense(30, activation='relu', input_shape=X_train.shape[1:]))
-model.add(tf.keras.layers.Dense(1))
+model.add(tf.keras.layers.Dense(1)) # 회귀 문제이므로 ouput 1개, 활성화함수 X
 model.compile(loss='mean_squared_error',optimizer='sgd')
 history = model.fit(X_train, y_train, epochs=20, validation_data=(X_valid,y_valid))
 model.evaluate(X_test, y_test)
@@ -81,7 +82,7 @@ model = tf.keras.Model(inputs=[input_A,input_B], outputs=[output, aux_output])
 model.compile(loss=['mse','mse'], loss_weights=[.9,.1], optimizer=tf.keras.optimizers.SGD(lr=1e-3))
 
 history = model.fit((X_train_A, X_train_B), [y_train,y_train],
-                     epochs=10, validation_data=((X_valid_A,X_valid_B),(y_valid,y_valid)))
+                     epochs=10, validation_data=((X_valid_A,X_valid_B),(y_valid,y_valid))) # input 2개, output 2개이고 validation set도 2개씩 설정해야함 주의
 total_loss,main_loss,aux_loss = model.evaluate([X_test_A,X_test_B],[y_test,y_test])
 
 y_pred_main, y_pred_aux = model.predict([X_new_A,X_new_B])
@@ -111,7 +112,7 @@ def build_model(n_hidden=1, n_neurons=30, learning_rate=3e-3, input_shape=[8]):
     model.compile(loss='mse', optimizer=optimizer)
     return model
 
-keras_reg = tf.keras.wrappers.scikit_learn.KerasRegressor(build_model) # 사이킷런 추정기처럼 객체 사용 가능
+keras_reg = tf.keras.wrappers.scikit_learn.KerasRegressor(build_model) # 사이킷런 추정기 형태로 변환
 
 keras_reg.fit(X_train,y_train,epochs=100,validation_data=(X_valid,y_valid),
               callbacks=[tf.keras.callbacks.EarlyStopping(patience=5)])
